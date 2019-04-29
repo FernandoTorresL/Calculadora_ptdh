@@ -1,17 +1,33 @@
 @extends('layouts.app')
 
+@section('title')
+    Calculadora PTdH
+@endsection
+
 @section('content')
-    <div class="title m-b-md">
-        Laravel
+    <div class="jumbotron text-center">
+        <h1>Calculadora PTdH</h1>
+        <nav class="nav">
+            <a class="nav-link active">Home</a>
+            <a class="nav-link disabled" href="calculadora">Limpiar Calculadora</a>
+        </nav>
     </div>
 
-    <div class="links">
-        <a href="https://laravel.com/docs">Docs</a>
-        <a href="https://laracasts.com">Laracasts</a>
-        <a href="https://laravel-news.com">News</a>
-        <a href="https://blog.laravel.com">Blog</a>
-        <a href="https://nova.laravel.com">Nova</a>
-        <a href="https://forge.laravel.com">Forge</a>
-        <a href="https://github.com/laravel/laravel">GitHub</a>
+    <div class="row">
+        <form action="/calculadora/calcula" method="post">
+            @csrf
+            <div class="form-group">
+                Nombre Patrón: <input type="text" name="nombre_patron" class="form-control" placeholder="Nombre del Patrón">
+                Días laborados con este patrón: <input type="text" name="dias_laborados" class="form-control" placeholder="Días laborados">
+                Sueldo mensual con este patrón: <input type="text" name="sueldo_mensual" class="form-control" placeholder="Sueldo mensual">
+            </div>
+
+            <div class="input-group text-right">
+                <button type="submit" class="btn btn-primary">Agregar Patrón</button>
+            </div>
+            <div class="input-group text-left">
+                <button type="" class="btn btn-info">Limpiar</button>
+            </div>
+        </form>
     </div>
 @endsection

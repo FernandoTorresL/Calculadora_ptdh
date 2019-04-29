@@ -5,9 +5,10 @@
 @endsection
 
 @section('content')
-    <div class="content">
-        <div class="title ">
-            {{ $title_calc01 }}
-        </div>
+    <div class="jumbotron text-center">
+        <h1>Resultados!</h1>
+        {{ $title_calc01 }}
+
     </div>
+    
 @endsection

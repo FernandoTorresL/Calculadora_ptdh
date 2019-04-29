@@ -6,11 +6,14 @@ use Illuminate\Http\Request;
 
 class CalculadoraController extends Controller
 {
-    public function home ()
+
+    public function calcula (Request $request)
     {
-        $title_calc01 = 'Calculadora';
-        return view('calc.calc_home', [
+        //dd($request->all());
+        $title_calc01 = 'Calculadora02';
+        return view('calc.calc_resultados', [
             'title_calc01' => $title_calc01,
         ]);
+        //return 'Calculando...';
     }
 }

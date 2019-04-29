@@ -15,4 +15,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/calculadora', 'CalculadoraController@home');
+Route::post('/calculadora/calcula', 'CalculadoraController@calcula');
