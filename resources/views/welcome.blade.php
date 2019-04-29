@@ -1,99 +1,56 @@
-<!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>Laravel</title>
+@section('title')
+    Calculadora PTdH
+@endsection
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
+@section('content')
+    <div class="jumbotron text-center">
+        <h1>Calculadora PTdH</h1>
+        <nav class="nav">
+            <a class="nav-link active">Home</a>
+            <a class="nav-link disabled" href="calculadora">Limpiar Calculadora</a>
+        </nav>
+    </div>
 
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Nunito', sans-serif;
-                font-weight: 200;
-                height: 100vh;
-                margin: 0;
-            }
+    <div class="row">
+        <form action="/calculadora/calcula" method="post">
+            @csrf
 
-            .full-height {
-                height: 100vh;
-            }
+            @if ($errors->any())
+                @php
+                    //dd($errors);
+                @endphp
 
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
+                @foreach ($errors->get('nombre_patron') as $error)
+                    <div class="text-danger">{{ $error }}</div>
+                @endforeach
 
-            .position-ref {
-                position: relative;
-            }
+                @foreach ($errors->get('dias_laborados') as $error)
+                    <div class="text-danger">{{ $error }}</div>
+                @endforeach
 
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 13px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}">Register</a>
-                        @endif
-                    @endauth
-                </div>
+                @foreach ($errors->get('sueldo_mensual') as $error)
+                    <div class="text-danger">{{ $error }}</div>
+                @endforeach
             @endif
+            <div class="form-group">
+                Nombre Patrón:
+                <input type="text" name="nombre_patron" class="form-control" placeholder="Nombre del Patrón">
 
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
-                </div>
+                Días laborados con este patrón:
+                <input type="text" name="dias_laborados" class="form-control" placeholder="Días laborados">
 
-                <div class="links">
-                    <a href="https://laravel.com/docs">Docs</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://blog.laravel.com">Blog</a>
-                    <a href="https://nova.laravel.com">Nova</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
+                Sueldo mensual con este patrón:
+                <input type="text" name="sueldo_mensual" class="form-control" placeholder="Sueldo mensual">
             </div>
-        </div>
-    </body>
-</html>
+
+            <div class="input-group text-right">
+                <button type="submit" class="btn btn-primary">Agregar Patrón</button>
+            </div>
+            <div class="input-group text-left">
+                <button type="" class="btn btn-info">Limpiar</button>
+            </div>
+        </form>
+    </div>
+@endsection
