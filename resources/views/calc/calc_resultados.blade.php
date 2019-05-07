@@ -13,7 +13,41 @@
 
     <div>
 
-        <table class="table small table-active">
+        <table class="table">
+            <thead class="thead">
+            <tr>
+                <th scope="col">Tabla 3</th>
+            </tr>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nombre Patrón</th>
+                <th scope="col">Días laborados</th>
+                <th scope="col">Valor Proporcional</th>
+                <th scope="col">Total Cuota Obrera</th>
+                <th scope="col">Total Cuota Patronal</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            @foreach ($tablas_calculos3 as $patron)
+                <tr>
+                    <th scope="col">{{ key($tablas_calculos3)+1 }}</th>
+                    <td>{{ $patron['patron'] }}</td>
+                    <td>{{ $patron['dias_laborados'] }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                @php next($tablas_calculos3); @endphp
+            @endforeach
+            </tbody>
+        </table>
+
+    </div>
+
+    <div>
+
+        <table class="table">
             <thead class="thead-dark">
             <tr>
                 <th scope="col">Tabla 1</th>
@@ -54,7 +88,7 @@
 
     <div>
 
-        <table class="table small table-success">
+        <table class="table">
             <thead class="thead-light">
             <tr>
                 <th scope="col">Tabla 2</th>
@@ -63,7 +97,7 @@
 
             <tbody>
             @foreach ($tablas_calculos2 as $mes)
-                <thead class="thead-dark">
+                <thead class="thead-light">
                 <tr>
                     <th scope="col">Mes: {{ key($tablas_calculos2) }}</th>
                 </tr>
