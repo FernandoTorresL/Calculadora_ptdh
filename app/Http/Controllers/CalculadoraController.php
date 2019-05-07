@@ -7,20 +7,59 @@ use Illuminate\Http\Request;
 
 class CalculadoraController extends Controller
 {
+    private function fntFormato_SUA($pvalor, $pusar_function)
+    {
+        if ( !$pusar_function )
+            return $pvalor;
+
+            if ( isset($pvalor) && is_numeric($pvalor) ) {
+
+                if ( is_float($pvalor) ) {
+
+                    if ( substr( $pvalor, strpos($pvalor, ".") + 3, 1  ) <= 4 )
+                        return floatval($pvalor);
+                    else
+                        return substr( $pvalor, 1, strpos($pvalor, ".") + 2 ) + 0.01;
+                }
+                else
+                    return $pvalor;
+            }
+            else
+                return 0;
+    }
 
     //public function calcula(CalculaCuotasRequest $request)
     public function calcula()
     {
         //temp vars
         $numero_de_patrones = 2;
+        $busar_function = true;
+        $mes = 2;
+        $sal_men = 5000;
+        $num_decimales = 2;
+
 
         //Create empty arrays
         $tablas_calculos1 = [];
         $tablas_calculos2 = [];
         $tablas_calculos3 = [];
+        $dias_mes = [
+            '1' => 31,
+            '2' => 28,
+            '3' => 31,
+            '4' => 30,
+            '5' => 31,
+            '6' => 30,
+            '7' => 31,
+            '8' => 31,
+            '9' => 30,
+            '10' => 31,
+            '11' => 30,
+            '12' => 31
+        ];
 
         //Fill arrays with more elements, one for each month of a year
-        for ($i = 0; $i <= ($numero_de_patrones - 1) ; $i++) {
+        for ($i = 0; $i <= ($numero_de_patrones - 1); $i++) {
             array_push($tablas_calculos3, [
                     'patron'             => null,
                     'dias_laborados'     => null,
@@ -87,7 +126,14 @@ class CalculadoraController extends Controller
 
         //]);
 
-        $title_calc01 = 'Calculadora02';
+        $title_calc01 = 'Calculadora';
+
+        //BEGIN CALCULATIONS
+        $tablas_calculos1[$mes]['salario'][0] = $this->fntFormato_SUA($sal_men, $busar_function) / $dias_mes[$mes];
+        $tablas_calculos1[$mes]['salario'][0] = number_format( $tablas_calculos1[$mes]['salario'][0], $num_decimales );
+        $tablas_calculos1[$mes]['salario'][1] = $tablas_calculos1[$mes]['salario'][0];
+
+        $tablas_calculos1[$mes]['salario'][0] = $this->fntFormato_SUA($sal_men, $busar_function) / $dias_mes[$mes];
 
         return view('calc.calc_resultados', [
             'tablas_calculos1' => $tablas_calculos1,
