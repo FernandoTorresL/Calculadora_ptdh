@@ -29,16 +29,16 @@
             </thead>
 
             <tbody>
-            @foreach ($tablas_calculos3 as $patron)
+            @foreach ($t3 as $patron)
                 <tr>
-                    <th scope="col">{{ key($tablas_calculos3)+1 }}</th>
+                    <th scope="col">{{ key($t3)+1 }}</th>
                     <td>{{ $patron['patron'] }}</td>
                     <td>{{ $patron['dias_laborados'] }}</td>
                     <td></td>
                     <td></td>
                     <td></td>
                 </tr>
-                @php next($tablas_calculos3); @endphp
+                @php next($t3); @endphp
             @endforeach
             </tbody>
         </table>
@@ -55,10 +55,10 @@
             </thead>
 
             <tbody>
-            @foreach ($tablas_calculos1 as $mes)
+            @foreach ($t1 as $mes)
                 <thead class="thead-dark">
                 <tr>
-                    <th scope="col">Mes: {{ key($tablas_calculos1) }}</th>
+                    <th scope="col">Mes: {{ key($t1) }}</th>
                 </tr>
                 <tr>
                     <th scope="col">Concepto</th>
@@ -69,7 +69,7 @@
                 </thead>
                 @foreach ($mes as $concepto)
                         <tr>
-                            <th scope="row">Tabla 1 | Mes: {{ key($tablas_calculos1) . ' | ' . key($mes) }}</th>
+                            <th scope="row">Tabla 1 | Mes: {{ key($t1) . ' | ' . key($mes) }}</th>
                     @foreach ($concepto as $key => $value)
                             <td>{{ $value }}</td>
                     @endforeach
@@ -78,7 +78,7 @@
 
                 @endforeach
 
-                @php next($tablas_calculos1); @endphp
+                @php next($t1); @endphp
 
             @endforeach
             </tbody>
@@ -96,10 +96,10 @@
             </thead>
 
             <tbody>
-            @foreach ($tablas_calculos2 as $mes)
+            @foreach ($t2 as $mes)
                 <thead class="thead-light">
                 <tr>
-                    <th scope="col">Mes: {{ key($tablas_calculos2) }}</th>
+                    <th scope="col">Mes: {{ key($t2) }}</th>
                 </tr>
                 <tr>
                     <th scope="col">Concepto</th>
@@ -110,7 +110,7 @@
                 </thead>
                 @foreach ($mes as $concepto)
                     <tr>
-                        <th scope="row">Tabla 2 | Mes: {{ key($tablas_calculos2) . ' | ' . key($mes) }}</th>
+                        <th scope="row">Tabla 2 | Mes: {{ key($t2) . ' | ' . key($mes) }}</th>
                         @foreach ($concepto as $key => $value)
                             <td>{{ $value }}</td>
                         @endforeach
@@ -119,7 +119,7 @@
 
                     @endforeach
 
-                    @php next($tablas_calculos2); @endphp
+                    @php next($t2); @endphp
 
                     @endforeach
                     </tbody>
