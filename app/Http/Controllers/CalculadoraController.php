@@ -43,6 +43,10 @@ class CalculadoraController extends Controller
                 return 0;
     }
 
+    private function esBisiesto($year=NULL) {
+        return checkdate(2, 29, ($year==NULL)? date('Y'):$year);
+    }
+
     //public function calcula(CalculaCuotasRequest $request)
     public function calcula()
     {
@@ -53,11 +57,12 @@ class CalculadoraController extends Controller
         $sal_men = 5000;
         $num_decimales = 2;
 
-
         //Create empty arrays
         $t1 = [];
         $t2 = [];
         $t3 = [];
+
+        //Fill array with number of days per month
         $dias_mes = [
             '1' => 31,
             '2' => 28,
@@ -73,31 +78,28 @@ class CalculadoraController extends Controller
             '12' => 31
         ];
 
-        //Fill arrays with more elements, one for each month of a year
-        for ($i = 0; $i <= ($numero_de_patrones - 1); $i++) {
-            array_push($t3, [
-                    'patron'             => null,
-                    'dias_laborados'     => null,
-                    'valor_proporcional' => null,
-                    'total_cuota_obrera' => null
-                ]
-            );
-        };
-
-        $t3['0']['patron'] = "Luis Rubén Martínez";
-        $t3['1']['patron'] = "FTL";
-        $t3['0']['dias_laborados'] = 10;
-        $t3['1']['dias_laborados'] = 12;
+        //if this year is "bisiesto", add one day to February
+        if ($this->esBisiesto())
+            $dias_mes['2'] = 29;
 
         for ($i = 0; $i <= 12; $i++) {
+            array_push($t3, [
+                'patron'               => [],
+                'dias_laborados'       => [],
+                'valor_proporcional'   => [],
+                'total_cuota_obrera'   => [],
+                'total_cuota_patronal' => []
+                ]
+            );
+
             array_push($t1, [
                 'salario'   => [null, null, null],
                 'v25vsmdf'  => [null, null, null],
-                'art28_25' => [null, null, null],
-                'dias'     => [null, null, null],
-                'aus'      => [null, null, null],
-                'inc'      => [null, null, null],
-                'cf'       => [null, null, null],
+                'art28_25'  => [null, null, null],
+                'dias'      => [null, null, null],
+                'aus'       => [null, null, null],
+                'inc'       => [null, null, null],
+                'cf'        => [null, null, null],
                 'exc_pat'   => [null, null, null],
                 'exc_ob'    => [null, null, null],
                 'pd_pat'    => [null, null, null],
@@ -131,18 +133,15 @@ class CalculadoraController extends Controller
             ]);
         }
 
-        //dd($t2);
-        //$tmptabla1['1']['exc_ob'][1] = 1978;
-        //$tmptabla1['2']['pd_pat'][2] = 2019;
-        //$tmptabla1['12']['total_cop'][1] = 205000;
-        //dd($tmptabla1['2']);
-        //dd($tmptabla1);
-        //dd($tmptabla1['2']['v25vsmdf'][1]);
-        //=222
-
-        //$this->validate($request, [
-
-        //]);
+        for ($i = 0; $i <= 12; $i++) {
+            for ($j = 0; $j <= ($numero_de_patrones - 1); $j++) {
+                array_push($t3[$i]['patron'], null);
+                array_push($t3[$i]['dias_laborados'], null);
+                array_push($t3[$i]['valor_proporcional'], null);
+                array_push($t3[$i]['total_cuota_obrera'], null);
+                array_push($t3[$i]['total_cuota_patronal'], null);
+            }
+        }
 
         $title_calc01 = 'Calculadora';
 
@@ -322,7 +321,146 @@ class CalculadoraController extends Controller
                 $t1[$mes]['cuota_ob'][$i];
         }
 
+        //Calcs to table 2
+        for ($i = 0; $i <= 2; $i++) {
+            $t2[$mes]['salario'][$i] = $t1[$mes]['salario'][$i];
+            $t2[$mes]['v25vsmdf'][$i] = $t1[$mes]['v25vsmdf'][$i];
+        }
+
+        $c11 = env('LIMITE_SBC') * $uma;
+        if ( $t2[$mes]['salario'][0] > $c11 )
+            $t2[$mes]['v20vsmdf'][0] = $c11;
+        else
+            $t2[$mes]['v20vsmdf'][0] = $t2[$mes]['salario'][0];
+
+        if ( is_null( env('LIMITE_SBC_SUB') ) )
+            $t2[$mes]['v20vsmdf'][1] = null;
+        else {
+            $c12 = env('LIMITE_SBC_SUB') * $uma;
+            if ($t2[$mes]['salario'][1] > $c12)
+                $t2[$mes]['v20vsmdf'][1] = $c12;
+            else
+                $t2[$mes]['v20vsmdf'][1] = $t2[$mes]['salario'][1];
+        }
+
+        $t2[$mes]['dias'][0] = $dias_mes[$mes];
+        $t2[$mes]['dias'][1] = $dias_mes[$mes];
+        $t2[$mes]['dias'][2] = null;
+
+        $t2[$mes]['aus'][0] = env('DIAS_AUS');
+        $t2[$mes]['aus'][1] = env('DIAS_AUS');
+        $t2[$mes]['aus'][2] = null;
+
+        $t2[$mes]['inc'][0] = env('DIAS_INC');
+        $t2[$mes]['inc'][1] = env('DIAS_INC');
+        $t2[$mes]['inc'][2] = null;
+
+        $c12 = $dias_mes[$mes] - env('DIAS_AUS');
+        $t2[$mes]['retiro'][0] = $t2[$mes]['v25vsmdf'][0] * $c12 * env('RETIRO');
+        $t2[$mes]['retiro'][0] = $this->fntFormato_SUA($t2[$mes]['retiro'][0], $busar_function);
+        $t2[$mes]['retiro'][1] = $t2[$mes]['v25vsmdf'][1] * $c12 * env('RETIRO');
+        $t2[$mes]['retiro'][1] = $this->fntFormato_SUA($t2[$mes]['retiro'][1], $busar_function);
+        $t2[$mes]['retiro'][1] = $t2[$mes]['retiro'][1] * env('SUBSIDIO');
+        $t2[$mes]['retiro'][1] = $this->fntTruncate($t2[$mes]['retiro'][1], 2);
+        $t2[$mes]['retiro'][2] = $t2[$mes]['retiro'][0] - $t2[$mes]['retiro'][1];
+
+        $c13 = $c12 - env('DIAS_INC');
+        $t2[$mes]['cv_pat'][0] = $t2[$mes]['v25vsmdf'][0] * $c13 * env('C_V_PAT');
+        $t2[$mes]['cv_pat'][0] = $this->fntFormato_SUA( $t2[$mes]['cv_pat'][0], $busar_function );
+        $t2[$mes]['cv_pat'][1] = $t2[$mes]['v25vsmdf'][1] * $c13 * env('C_V_PAT');
+        $t2[$mes]['cv_pat'][1] = $this->fntFormato_SUA($t2[$mes]['cv_pat'][1], $busar_function );
+        $t2[$mes]['cv_pat'][1] = $t2[$mes]['cv_pat'][1] * env('SUBSIDIO');
+        $t2[$mes]['cv_pat'][1] = $this->fntTruncate($t2[$mes]['cv_pat'][1], 2);
+        $t2[$mes]['cv_pat'][2] = $t2[$mes]['cv_pat'][0] - $t2[$mes]['cv_pat'][1];
+
+        $t2[$mes]['cv_ob'][0] = $t2[$mes]['v25vsmdf'][0] * $c13 * env('C_V_OB');
+        $t2[$mes]['cv_ob'][0] = $this->fntFormato_SUA( $t2[$mes]['cv_ob'][0], $busar_function );
+        $t2[$mes]['cv_ob'][1] = $t2[$mes]['v25vsmdf'][1] * $c13 * env('C_V_PAT');
+        $t2[$mes]['cv_ob'][1] = $this->fntFormato_SUA($t2[$mes]['cv_ob'][1], $busar_function );
+        $t2[$mes]['cv_ob'][1] = $t2[$mes]['cv_ob'][1] * env('SUBSIDIO');
+        $t2[$mes]['cv_ob'][1] = $this->fntTruncate($t2[$mes]['cv_ob'][1], 2);
+        $t2[$mes]['cv_ob'][2] = $t2[$mes]['cv_ob'][0] - $t2[$mes]['cv_ob'][1];
+
+        for ($i = 0; $i <= 1; $i++) {
+            $t2[$mes]['suma_rcv'][$i] =
+                $t2[$mes]['cv_pat'][$i] +
+                $t2[$mes]['cv_ob'][$i] +
+                $t2[$mes]['retiro'][$i];
+        }
+        $t2[$mes]['suma_rcv'][2] = $t2[$mes]['suma_rcv'][0] - $t2[$mes]['suma_rcv'][1];
+
+        $t2[$mes]['aportacion'][0] = $t2[$mes]['v25vsmdf'][0] * $c12 * env('AP_PAT_INFONAVIT');
+        $t2[$mes]['aportacion'][0] = $this->fntFormato_SUA($t2[$mes]['aportacion'][0], $busar_function);
+        $t2[$mes]['aportacion'][1] = $t2[$mes]['v25vsmdf'][1] * $c12 * env('AP_PAT_INFONAVIT');
+        $t2[$mes]['aportacion'][1] = $this->fntFormato_SUA($t2[$mes]['aportacion'][1], $busar_function);
+        $t2[$mes]['aportacion'][1] = $t2[$mes]['aportacion'][1] * env('SUBSIDIO');
+        $t2[$mes]['aportacion'][1] = $this->fntTruncate($t2[$mes]['aportacion'][1], 2);
+        $t2[$mes]['aportacion'][2] = $t2[$mes]['aportacion'][0] - $t2[$mes]['aportacion'][1];
+
+        for ($i = 0; $i <= 2; $i++) {
+            $t2[$mes]['tot_pat'][$i] = $t2[$mes]['retiro'][$i] + $t2[$mes]['cv_pat'][$i] + $t2[$mes]['aportacion'][$i];
+            $t2[$mes]['tot_ob'][$i] = $t2[$mes]['cv_ob'][$i];
+            $t2[$mes]['tot_rcv_infonavit'][$i] = $t2[$mes]['tot_pat'][$i] + $t2[$mes]['tot_ob'][$i];
+        }
+
+        //Temporary vars
+        $t3[$mes]['patron'][0] = "Luis Rubén";
+        $t3[$mes]['patron'][1] = "FTL";
+        $t3[$mes]['dias_laborados'][0] = 10;
+        $t3[$mes]['dias_laborados'][1] = 12;
+
+        $t3[0]['patron'][0] = "Luis Rubén";
+        $t3[0]['patron'][1] = "FTL";
+        $t3[0]['dias_laborados'][0] = 10;
+        $t3[0]['dias_laborados'][1] = 12;
+        $t3[0]['valor_proporcional'][0] = 'A';
+        $t3[0]['valor_proporcional'][1] = 'D';
+        $t3[0]['total_cuota_obrera'][0] = 'B';
+        $t3[0]['total_cuota_obrera'][1] = 'E';
+        $t3[0]['total_cuota_patronal'][0] = 'C';
+        $t3[0]['total_cuota_patronal'][1] = 'F';
+
+        $t3[12]['patron'][0] = "Jorge";
+        $t3[12]['patron'][1] = "Miguel";
+        $t3[12]['dias_laborados'][0] = 55;
+        $t3[12]['dias_laborados'][1] = 66;
+        $t3[12]['valor_proporcional'][0] = 'xDA';
+        $t3[12]['valor_proporcional'][1] = 'xDD';
+        $t3[12]['total_cuota_obrera'][0] = 'xDB';
+        $t3[12]['total_cuota_obrera'][1] = 'xDE';
+        $t3[12]['total_cuota_patronal'][0] = 'xDC';
+        $t3[12]['total_cuota_patronal'][1] = 'xDF';
+
+        //Calcs for table #3
+        $total_dias = 0;
+        for ($i = 0; $i <= ($numero_de_patrones - 1); $i++) {
+            $total_dias = $total_dias + $t3[$mes]['dias_laborados'][$i];
+        }
+
+        for ($i = 0; $i <= ($numero_de_patrones - 1); $i++) {
+            $t3[$mes]['valor_proporcional'][$i] = $t3[$mes]['dias_laborados'][$i] / $total_dias;
+            if ( env('SMDF') == $t1[$mes]['salario'][0] ) {
+                $t3[$mes]['total_cuota_obrera'][$i] = 0;
+                $t3[$mes]['total_cuota_patronal'][$i] =
+                    $t3[$mes]['valor_proporcional'][$i] * ( $t1[$mes]['cuota_ob'][2] + $t2[$mes]['tot_ob'][2] ) +
+                    $t3[$mes]['valor_proporcional'][$i] * ( $t1[$mes]['cuota_pat'][2] + $t2[$mes]['tot_pat'][2] );
+            }
+            else {
+                $t3[$mes]['total_cuota_obrera'][$i] =
+                    $t3[$mes]['valor_proporcional'][$i] * ( $t1[$mes]['cuota_ob'][2] + $t2[$mes]['tot_ob'][2] );
+                $t3[$mes]['total_cuota_obrera'][$i] =
+                    $this->fntFormato_SUA($t3[$mes]['total_cuota_obrera'][$i], $busar_function);
+
+                $t3[$mes]['total_cuota_patronal'][$i] =
+                    $t3[$mes]['valor_proporcional'][$i] * ( $t1[$mes]['cuota_pat'][2] + $t2[$mes]['tot_pat'][2] );
+                $t3[$mes]['total_cuota_patronal'][$i] =
+                    $this->fntFormato_SUA($t3[$mes]['total_cuota_patronal'][$i], $busar_function);
+
+            }
+        }
+
         return view('calc.calc_resultados', [
+            'numero_de_patrones' => $numero_de_patrones,
             't1' => $t1,
             't2' => $t2,
             't3' => $t3,
